@@ -1,17 +1,27 @@
 package cn.biyang.chatbot.api.test;
 
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
+import org.openqa.selenium.json.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.java2d.pisces.PiscesRenderingEngine;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @Author biyang
@@ -20,6 +30,7 @@ import java.io.IOException;
  * @Version 1.0
  */
 public class ApiTest {
+    private Logger logger = LoggerFactory.getLogger(ApiTest.class);
     @Test
     public void query_unanserwed_query() throws IOException {
 
@@ -61,6 +72,30 @@ public class ApiTest {
             System.out.println(res);
         }else{
             System.out.println(response.getStatusLine().getStatusCode());
+        }
+
+    }
+
+    @Test
+    public void chatApi() throws IOException{
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost post = new HttpPost("https://api.openai-proxy.com/v1/chat/completions");
+        post.addHeader("Content-Type","application/json");
+        post.addHeader("Authorization","Bearer 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");
+        String paramJson = "{\n" +
+                "     \"model\": \"gpt-3.5-turbo\",\n" +
+                "     \"messages\": [{\"role\": \"user\", \"content\": \"给我一个java冒泡排序程序\"}],\n" +
+                "     \"temperature\": 0.7\n" +
+                "   }";
+        StringEntity entity = new StringEntity(paramJson, ContentType.create("text/json", "UTF-8"));
+        post.setEntity(entity);
+        CloseableHttpResponse response = httpClient.execute(post);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK){
+            String s = EntityUtils.toString(response.getEntity());
+            logger.info("调用Api接口回复为： {}",s);
+        }else {
+            logger.info("测试发生错误，错误信息为： {}",response.getStatusLine().getStatusCode());
         }
 
     }

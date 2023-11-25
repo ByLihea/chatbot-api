@@ -1,5 +1,6 @@
 package cn.biyang.chatbot.api.test;
 
+import cn.biyang.chatbot.api.domain.ai.IOpenAi;
 import cn.biyang.chatbot.api.domain.zsxq.model.aggregates.UnAnsweredQuestionAggregates;
 import cn.biyang.chatbot.api.domain.zsxq.model.vo.Talk;
 import cn.biyang.chatbot.api.domain.zsxq.model.vo.Topics;
@@ -38,6 +39,9 @@ public class SpringBootRunTest {
     @Resource
     private IZsxqAPI zsxqApi;
 
+    @Resource
+    private IOpenAi openAi;
+
     @Test
     public void test_zsxqAPI() throws IOException {
         String answerText = "等";
@@ -46,14 +50,20 @@ public class SpringBootRunTest {
 
         List<Topics> topics = unAnsweredQuestionAggregates.getResp_data().getTopics();
         logger.info("总共有{}个topic",topics.size());
-        for(Topics topic : topics){
+        for(Topics topic : topics) {
             String topicID = topic.getTopic_id();
             Talk talk = topic.getTalk();
             String text = talk.getText();
-            logger.info("the topic id is {}, the text is {}",topicID,text);
-            zsxqApi.answer(groupId,cookie,topicID,answerText);
+            logger.info("the topic id is {}, the text is {}", topicID, text);
+            zsxqApi.answer(groupId, cookie, topicID, answerText);
         }
+    }
 
+    @Test
+    public void test_chatWithOpenai() throws IOException {
+        String question = "给我一个java冒泡排序成绩";
+        String s = openAi.chatWithOpenai(question);
+        logger.info("openAi回答的问题为：{}",s);
     }
 
 
